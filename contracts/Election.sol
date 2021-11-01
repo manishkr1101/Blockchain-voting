@@ -20,8 +20,9 @@ contract Election {
     );
 
     constructor() public {
-        addCandidate("Obama");
-        addCandidate("Biden");
+        addCandidate("Barack Obama");
+        addCandidate("Joe Biden");
+        addCandidate("Donald Trump");
     } 
 
     function addCandidate(string memory _name) private {

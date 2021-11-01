@@ -1,17 +1,27 @@
 import React from 'react';
-import {Navbar, Container, Nav} from 'react-bootstrap'
+import {BrowserRouter as Router,
+  Switch, 
+  Route} from 'react-router-dom';
+
 import './App.css';
 import Web3 from 'web3';
 import ElectionAbi from './contracts/Election.json'
+
+import Nabvar from './components/Navbar'
+import Home from './components/Home'
+import ElectionResult from './components/ElectionResult'
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentAccount: ''
+      currentAccount: '0x',
+      loading: true,
+      Election: {}
     }
   }
   componentDidMount() {
+    this.setState({loading: true});
     this.loadWeb3()
     .then(() => this.loadBlockchainData()); 
   }
@@ -31,33 +41,48 @@ class App extends React.Component {
 
     const accounts = await web3.eth.getAccounts();
     const account = accounts[0];
-    this.setState({...this.state, currentAccount: account})
+    
     const networkId = await web3.eth.net.getId();
     const networkData = ElectionAbi.networks[networkId];
 
     if(networkData) {
-      const election = new web3.eth.Contract(ElectionAbi.abi, networkData.address);
-      console.log(election);
+      const electionContract = new web3.eth.Contract(ElectionAbi.abi, networkData.address);
+      this.setState({
+        loading: false, 
+        currentAccount: account,
+        Election: electionContract
+      })
     } else {
-      alert('the smart contracts not deployed to the current network')
+      alert('the smart contracts not deplo yed to the current network')
     }
   }
+  updateState(state) {
+    this.setState({
+      ...this.state,
+      ...state
+    });
+  }
   render() {
+    
+    if(this.state.loading) {
+      return <div>Loading...</div>
+    }
+
     return (
-      <div>
-        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
-          <Container>
-            <Navbar.Brand href="/">Election Dapp</Navbar.Brand>
-            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Navbar.Collapse id="responsive-navbar-nav">
-              <Nav className="me-auto"></Nav>
-              <Nav>
-                <Nav.Link href="#">{this.state.currentAccount}</Nav.Link>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
-      </div>
+      <Router>
+        <div>
+          <Nabvar account={this.state.currentAccount}/>
+        </div>
+        <Switch>
+          <Route path="/result">
+            <ElectionResult />
+          </Route>
+          
+          <Route path="/">
+            <Home account={this.state.currentAccount} electionSm={this.state.Election} />
+          </Route>
+        </Switch>
+      </Router>
     )
   }
 }
