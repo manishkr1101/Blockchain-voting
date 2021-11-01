@@ -62,6 +62,16 @@ class App extends React.Component {
       ...state
     });
   }
+  getCandidates = async () => {
+    const Election = this.state.Election;
+    const candidateCount = await Election.methods.candidatesCount().call();
+    
+    let candidates = [];
+    for(let i=1; i<=candidateCount; i++) {
+        candidates.push(await Election.methods.candidates(i).call());
+    }
+    return candidates;
+  }
   render() {
     
     if(this.state.loading) {
@@ -75,7 +85,7 @@ class App extends React.Component {
         </div>
         <Switch>
           <Route path="/result">
-            <ElectionResult />
+            <ElectionResult getCandidates={this.getCandidates} />
           </Route>
           
           <Route path="/">
