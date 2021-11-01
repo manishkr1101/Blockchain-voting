@@ -20,3 +20,5 @@
 
 > use `sudo` before `truffle` in linux.
 
+- Add `contracts_build_directory: path.join(__dirname, "client/src/contracts")` in `truffle-config.js` file so that it becomes usable with react.
+
